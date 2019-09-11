@@ -102,16 +102,9 @@ static void version(void)
 	printf("%s %s\n", toolname, VERSION);
 }
 
-int load_cert(X509_STORE *certs, const char *filename)
+int load_certs(X509_STORE *certs, const char *filename)
 {
-	X509 *cert;
-
-	cert = fileio_read_cert(filename);
-	if (!cert)
-		return -1;
-
-	X509_STORE_add_cert(certs, cert);
-	return 0;
+	return fileio_read_certs(filename, certs);
 }
 
 static void print_signature_info(PKCS7 *p7)
@@ -267,7 +260,7 @@ int main(int argc, char **argv)
 
 		switch (c) {
 		case 'c':
-			rc = load_cert(certs, optarg);
+			rc = load_certs(certs, optarg);
 			if (rc)
 				return EXIT_FAILURE;
 			break;

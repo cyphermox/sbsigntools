@@ -138,6 +138,33 @@ out:
 	return cert;
 }
 
+int fileio_read_certs(const char *filename, X509_STORE *certs)
+{
+	X509 *cert = NULL;
+	BIO *bio;
+	int count = 0;
+
+	bio = BIO_new_file(filename, "r");
+	if (!bio)
+		goto out;
+
+	while ((cert = PEM_read_bio_X509(bio, NULL, NULL, NULL)) != NULL) {
+		X509_STORE_add_cert(certs, cert);
+		count++;
+	}
+
+	if (!cert && count == 0) {
+		fprintf(stderr, "Can't load certificates from file '%s'\n",
+				filename);
+		ERR_print_errors_fp(stderr);
+	}
+
+out:
+	BIO_free_all(bio);
+
+	return count > 0 ? 0 : -1;
+}
+
 static int __fileio_read_file(void *ctx, const char *filename,
 		 uint8_t **out_buf, size_t *out_len, int flags)
 {
